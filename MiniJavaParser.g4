@@ -39,7 +39,7 @@ options {
 }
 
 compilationUnit
-    : (classDeclaration | methodDeclaration | ';')*
+    : (classDeclaration | methodDeclaration | ';')* EOF
     ;
 
 classDeclaration
@@ -57,23 +57,8 @@ classBodyDeclaration
     | constructorDeclaration
     ;
 
-/* We use rule this even for void methods which cannot have [] after parameters.
-   This simplifies grammar and we can consider void to be a type, which
-   renders the [] matching as a context-sensitive issue or a semantic check
-   for invalid return type after parsing.
- */
 methodDeclaration
-    : typeTypeOrVoid identifier formalParameters methodBody
-    ;
-
-methodBody
-    : block
-    | ';'
-    ;
-
-typeTypeOrVoid
-    : typeType
-    | VOID
+    : (typeType | VOID) identifier formalParameters methodBody = block
     ;
 
 constructorDeclaration
@@ -81,11 +66,7 @@ constructorDeclaration
     ;
 
 fieldDeclaration
-    : typeType variableDeclarators ';'
-    ;
-
-variableDeclarators
-    : variableDeclarator (',' variableDeclarator)*
+    : typeType variableDeclarator ';'
     ;
 
 variableDeclarator
@@ -105,20 +86,8 @@ arrayInitializer
     : '{' (variableInitializer (',' variableInitializer)* ','?)? '}'
     ;
 
-classOrInterfaceType
-    : (identifier '.')* typeIdentifier
-    ;
-
 formalParameters
-    : '(' (
-        receiverParameter?
-        | receiverParameter (',' formalParameterList)?
-        | formalParameterList?
-    ) ')'
-    ;
-
-receiverParameter
-    : typeType (identifier '.')* THIS
+    : '(' formalParameterList? ')'
     ;
 
 formalParameterList
@@ -130,25 +99,11 @@ formalParameter
     ;
 
 literal
-    : integerLiteral
-    | floatLiteral
+    : DECIMAL_LITERAL
     | CHAR_LITERAL
     | STRING_LITERAL
     | BOOL_LITERAL
     | NULL_LITERAL
-    | TEXT_BLOCK // Java17
-    ;
-
-integerLiteral
-    : DECIMAL_LITERAL
-    | HEX_LITERAL
-    | OCT_LITERAL
-    | BINARY_LITERAL
-    ;
-
-floatLiteral
-    : FLOAT_LITERAL
-    | HEX_FLOAT_LITERAL
     ;
 
 // STATEMENTS / BLOCKS
@@ -159,13 +114,12 @@ block
 
 blockStatement
     : localVariableDeclaration ';'
-    | localTypeDeclaration
     | statement
     ;
 
 localVariableDeclaration
     : VAR identifier '=' expression
-    | typeType variableDeclarators
+    | typeType variableDeclarator
     ;
 
 identifier
@@ -204,13 +158,8 @@ typeIdentifier // Identifiers that are not restricted for type declarations
     | RECORD
     ;
 
-localTypeDeclaration
-    : classDeclaration
-    ;
-
 statement
-    : blockLabel = block
-    | ASSERT expression (':' expression)? ';'
+    : block
     | IF parExpression statement (ELSE statement)?
     | FOR '(' forControl ')' statement
     | WHILE parExpression statement
@@ -219,7 +168,6 @@ statement
     | CONTINUE ';'
     | SEMI
     | statementExpression = expression ';'
-    | identifierLabel = identifier ':' statement
     ;
 
 forControl
@@ -253,9 +201,6 @@ expression
     | expression bop = '.' (
         identifier
         | methodCall
-        | THIS
-        | NEW innerCreator
-        | SUPER superSuffix
     )
     // Method calls and method references are part of primary, and hence level 16 precedence
     | methodCall
@@ -267,7 +212,7 @@ expression
     | prefix = ('+' | '-' | '++' | '--' | '~' | 'not') expression
 
     // Level 13 Cast and object creation
-    | '(' typeType ('&' typeType)* ')' expression
+    | '(' typeType ')' expression
     | NEW creator
 
     // Level 12 to 1, Remaining operators
@@ -314,12 +259,8 @@ creator
     ;
 
 createdName
-    : identifier ('.' identifier)*
+    : typeIdentifier
     | primitiveType
-    ;
-
-innerCreator
-    : identifier classCreatorRest
     ;
 
 arrayCreatorRest
@@ -328,11 +269,11 @@ arrayCreatorRest
     ;
 
 classCreatorRest
-    : arguments classBody?
+    : arguments
     ;
 
 typeType
-    : (classOrInterfaceType | primitiveType) ('[' ']')*
+    : (typeIdentifier | primitiveType) ('[' ']')*
     ;
 
 primitiveType
@@ -340,11 +281,6 @@ primitiveType
     | CHAR
     | INT
     | STRING
-    ;
-
-superSuffix
-    : arguments
-    | '.' identifier arguments?
     ;
 
 arguments

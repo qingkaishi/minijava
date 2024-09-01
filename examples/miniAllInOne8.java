@@ -30,9 +30,16 @@ class InstanceOf{
 
 // Unicode
 class Unicode {
+    int a[] = {1, 2, 3};
+    int[] a = {1, 2, 3};
+    //int[3] a = {1, 2, 3};
+    int[] a = new int[3];
+
     void main(String[] args) {
         System.out.println("A = \uuu0041");
     }
+
+    void x() {this.main(new String[]{"1", "2"});}
 }
 
 
