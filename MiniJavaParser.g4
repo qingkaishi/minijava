@@ -119,21 +119,21 @@ localVariableDeclaration
 
 identifier
     : IDENTIFIER
-//    | MODULE
-//    | OPEN
-//    | REQUIRES
-//    | EXPORTS
-//    | OPENS
-//    | TO
-//    | USES
-//    | PROVIDES
-//    | WITH
-//    | TRANSITIVE
-//    | YIELD
-//    | SEALED
-//    | PERMITS
-//    | RECORD
-//    | VAR
+    | MODULE
+    | OPEN
+    | REQUIRES
+    | EXPORTS
+    | OPENS
+    | TO
+    | USES
+    | PROVIDES
+    | WITH
+    | TRANSITIVE
+    | YIELD
+    | SEALED
+    | PERMITS
+    | RECORD
+    | VAR
     ;
 
 typeIdentifier // Identifiers that are not restricted for type declarations
