@@ -29,9 +29,6 @@
  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-// $antlr-format alignTrailingComments true, columnLimit 150, minEmptyLines 1, maxEmptyLinesToKeep 1, reflowComments false, useTab false
-// $antlr-format allowShortRulesOnASingleLine false, allowShortBlocksOnASingleLine true, alignSemicolons hanging, alignColons hanging
-
 parser grammar MiniJavaParser;
 
 options {
@@ -106,8 +103,6 @@ literal
     | NULL_LITERAL
     ;
 
-// STATEMENTS / BLOCKS
-
 block
     : '{' blockStatement* '}'
     ;
@@ -124,21 +119,21 @@ localVariableDeclaration
 
 identifier
     : IDENTIFIER
-    | MODULE
-    | OPEN
-    | REQUIRES
-    | EXPORTS
-    | OPENS
-    | TO
-    | USES
-    | PROVIDES
-    | WITH
-    | TRANSITIVE
-    | YIELD
-    | SEALED
-    | PERMITS
-    | RECORD
-    | VAR
+//    | MODULE
+//    | OPEN
+//    | REQUIRES
+//    | EXPORTS
+//    | OPENS
+//    | TO
+//    | USES
+//    | PROVIDES
+//    | WITH
+//    | TRANSITIVE
+//    | YIELD
+//    | SEALED
+//    | PERMITS
+//    | RECORD
+//    | VAR
     ;
 
 typeIdentifier // Identifiers that are not restricted for type declarations
@@ -170,6 +165,10 @@ statement
     | statementExpression = expression ';'
     ;
 
+parExpression
+    : '(' expression ')'
+    ;
+
 forControl
     : forInit? ';' expression? ';' forUpdate = expressionList?
     ;
@@ -179,18 +178,8 @@ forInit
     | expressionList
     ;
 
-// EXPRESSIONS
-
-parExpression
-    : '(' expression ')'
-    ;
-
 expressionList
     : expression (',' expression)*
-    ;
-
-methodCall
-    : (identifier | THIS | SUPER) arguments
     ;
 
 expression
@@ -251,6 +240,10 @@ primary
     | SUPER
     | literal
     | identifier
+    ;
+
+methodCall
+    : (identifier | THIS | SUPER) arguments
     ;
 
 creator

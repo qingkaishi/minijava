@@ -1,5 +1,5 @@
 
-public class Escapes{
+class Escapes{
 
     void f(){
         String s1 = "-\u005ct-"; // -    -
