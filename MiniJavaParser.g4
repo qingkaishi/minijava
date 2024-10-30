@@ -67,11 +67,7 @@ fieldDeclaration
     ;
 
 variableDeclarator
-    : variableDeclaratorId ('=' variableInitializer)?
-    ;
-
-variableDeclaratorId
-    : identifier ('[' ']')*
+    : identifier ('=' variableInitializer)?
     ;
 
 variableInitializer
@@ -92,7 +88,7 @@ formalParameterList
     ;
 
 formalParameter
-    : typeType variableDeclaratorId
+    : typeType identifier
     ;
 
 literal
