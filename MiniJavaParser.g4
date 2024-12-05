@@ -35,13 +35,13 @@ options {
     tokenVocab = MiniJavaLexer;
 }
 
-compilationUnit
-    : (classDeclaration | methodDeclaration | ';')* EOF
-    ;
+compilationUnit : (classDeclaration | methodDeclaration | ';')* EOF;
 
 classDeclaration
-    : CLASS identifier (EXTENDS typeType)? classBody
+    : CLASS identifier parentClassDeclaration? classBody
     ;
+
+parentClassDeclaration : EXTENDS identifier;
 
 classBody
     : '{' classBodyDeclaration* '}'
@@ -54,16 +54,16 @@ classBodyDeclaration
     | constructorDeclaration
     ;
 
-methodDeclaration
-    : (typeType | VOID) identifier formalParameters methodBody = block
+fieldDeclaration
+    : typeType variableDeclarator ';'
     ;
 
 constructorDeclaration
     : identifier formalParameters constructorBody = block
     ;
 
-fieldDeclaration
-    : typeType variableDeclarator ';'
+methodDeclaration
+    : (typeType | VOID) identifier formalParameters methodBody = block
     ;
 
 variableDeclarator
@@ -130,23 +130,7 @@ identifier
     | PERMITS
     | RECORD
     | VAR
-    ;
-
-typeIdentifier // Identifiers that are not restricted for type declarations
-    : IDENTIFIER
-    | MODULE
-    | OPEN
-    | REQUIRES
-    | EXPORTS
-    | OPENS
-    | TO
-    | USES
-    | PROVIDES
-    | WITH
-    | TRANSITIVE
-    | SEALED
-    | PERMITS
-    | RECORD
+    | ASSERT
     ;
 
 statement
@@ -158,7 +142,7 @@ statement
     | BREAK ';'
     | CONTINUE ';'
     | SEMI
-    | statementExpression = expression ';'
+    | expression ';'
     ;
 
 parExpression
@@ -179,64 +163,34 @@ expressionList
     ;
 
 expression
-    // Expression order in accordance with https://introcs.cs.princeton.edu/java/11precedence/
-    // Level 16, Primary, array and member access
     : primary
     | expression '[' expression ']'
     | expression bop = '.' (
         identifier
         | methodCall
     )
-    // Method calls and method references are part of primary, and hence level 16 precedence
     | methodCall
-
-    // Level 15 Post-increment/decrement operators
     | expression postfix = ('++' | '--')
-
-    // Level 14, Unary operators
     | prefix = ('+' | '-' | '++' | '--' | '~' | 'not') expression
-
-    // Level 13 Cast and object creation
     | '(' typeType ')' expression
     | NEW creator
-
-    // Level 12 to 1, Remaining operators
-    | expression bop = ('*' | '/' | '%') expression           // Level 12, Multiplicative operators
-    | expression bop = ('+' | '-') expression                 // Level 11, Additive operators
-    | expression ('<' '<' | '>' '>' '>' | '>' '>') expression // Level 10, Shift operators
-    | expression bop = ('<=' | '>=' | '>' | '<') expression   // Level 9, Relational operators
-    | expression bop = INSTANCEOF (typeType)
-    | expression bop = ('==' | '!=') expression                      // Level 8, Equality Operators
-    | expression bop = '&' expression                                // Level 7, Bitwise AND
-    | expression bop = '^' expression                                // Level 6, Bitwise XOR
-    | expression bop = '|' expression                                // Level 5, Bitwise OR
-    | expression bop = 'and' expression                               // Level 4, Logic AND
-    | expression bop = 'or' expression                               // Level 3, Logic OR
-    | <assoc = right> expression bop = '?' expression ':' expression // Level 2, Ternary
-    // Level 1, Assignment
+    | expression bop = ('*' | '/' | '%') expression
+    | expression bop = ('+' | '-') expression
+    | expression bop = ('<<' | '>>>' | '>>') expression
+    | expression bop = ('<=' | '>=' | '>' | '<') expression
+    | expression bop = ('==' | '!=') expression
+    | expression bop = '&' expression
+    | expression bop = '^' expression
+    | expression bop = '|' expression
+    | expression bop = 'and' expression
+    | expression bop = 'or' expression
+    | <assoc = right> expression bop = '?' expression ':' expression
     | <assoc = right> expression bop = (
-        '='
-        | '+='
-        | '-='
-        | '*='
-        | '/='
-        | '&='
-        | '|='
-        | '^='
-        | '>>='
-        | '>>>='
-        | '<<='
-        | '%='
+        '=' | '+=' | '-=' | '*=' | '/=' | '&=' | '|=' | '^=' | '>>=' | '>>>=' | '<<=' | '%='
     ) expression
     ;
 
-primary
-    : '(' expression ')'
-    | THIS
-    | SUPER
-    | literal
-    | identifier
-    ;
+primary : '(' expression ')' | THIS | SUPER | literal | identifier ;
 
 methodCall
     : (identifier | THIS | SUPER) arguments
@@ -248,8 +202,12 @@ creator
     ;
 
 createdName
-    : typeIdentifier
+    : identifier
     | primitiveType
+    ;
+
+classCreatorRest
+    : '(' expressionList? ')'
     ;
 
 arrayCreatorRest
@@ -257,12 +215,8 @@ arrayCreatorRest
     | ('[' expression ']')+ ('[' ']')*
     ;
 
-classCreatorRest
-    : arguments
-    ;
-
 typeType
-    : (typeIdentifier | primitiveType) ('[' ']')*
+    : (identifier | primitiveType) ('[' ']')*
     ;
 
 primitiveType
